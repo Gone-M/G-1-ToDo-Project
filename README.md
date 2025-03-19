@@ -33,10 +33,10 @@ To-Do App is a **task management application** that allows users to create, edit
 ## Installation Guide
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/todo-app.git
+   git clone https://github.com/Gone-M/G-1-ToDo-Project.git
    ```
 2. Open the project in **Xcode**.
-3. Select the iPhone 8 simulator.
+3. Select the iPhone 8 simulator or higher.
 4. Run the project by pressing **Cmd + R**.
 
 ## Technologies Used
@@ -48,11 +48,8 @@ To-Do App is a **task management application** that allows users to create, edit
 Each file contains comments explaining its purpose and implementation details. Major contributions are documented with author names.
 
 ## Demo Video
-A short video demonstrating the app is available at: **[Video Link]**
+A short video demonstrating the app is available at: **https://www.youtube.com/watch?v=mQnD81HFUuM**
 
 ## License
 This project is for educational purposes and is not intended for commercial use.
-
----
-**Note:** If you have questions or encounter issues, please contact any of the team members.
 
