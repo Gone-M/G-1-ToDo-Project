@@ -1,10 +1,14 @@
 import SwiftUI
 
+// MARK: - Task Priority
+
 enum TaskPriority: String, CaseIterable {
     case low = "Low"
     case medium = "Medium"
     case high = "High"
 }
+
+// MARK: - Task Status
 
 enum TaskStatus: String, CaseIterable {
     case pending = "Pending"
@@ -24,6 +28,8 @@ enum TaskStatus: String, CaseIterable {
     }
 }
 
+// MARK: - Task Type
+
 struct TaskType: Identifiable, Hashable {
     let id = UUID()
     var name: String
@@ -31,8 +37,10 @@ struct TaskType: Identifiable, Hashable {
     var color: Color
 }
 
+// MARK: - Task Model
+
 struct Task: Identifiable {
-    let id = UUID()
+    let id: UUID
     var title: String
     var description: String
     var dueDate: Date
@@ -42,4 +50,26 @@ struct Task: Identifiable {
     var tags: Set<String>
     var completedDate: Date?
     var reminderDate: Date?
+    
+    init(id: UUID = UUID(),
+         title: String,
+         description: String,
+         dueDate: Date,
+         taskType: TaskType,
+         status: TaskStatus,
+         priority: TaskPriority,
+         tags: Set<String>,
+         completedDate: Date? = nil,
+         reminderDate: Date? = nil) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.dueDate = dueDate
+        self.taskType = taskType
+        self.status = status
+        self.priority = priority
+        self.tags = tags
+        self.completedDate = completedDate
+        self.reminderDate = reminderDate
+    }
 }

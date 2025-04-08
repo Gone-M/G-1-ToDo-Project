@@ -1,6 +1,6 @@
-import Foundation
 import CoreData
-import Combine
+import Foundation
+import SwiftUI
 
 class PersistenceController: ObservableObject {
     static let shared = PersistenceController()
@@ -9,13 +9,11 @@ class PersistenceController: ObservableObject {
     
     init() {
         container = NSPersistentContainer(name: "ToDo")
-        
         container.loadPersistentStores { description, error in
             if let error = error {
                 fatalError("Unable to load persistent stores: \(error)")
             }
         }
-        
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
     }

@@ -1,5 +1,4 @@
 import Foundation
-import CoreData
 import Combine
 import SwiftUI
 
@@ -17,8 +16,7 @@ class TaskViewModel: ObservableObject {
     
     init() {
         setupTimer()
-        
-        // Setup notification for background/foreground state changes
+        // Uygulama foreground oldugunda durum güncellemesi yap
         NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink { [weak self] _ in
                 self?.updateStatuses()
@@ -32,7 +30,7 @@ class TaskViewModel: ObservableObject {
     }
     
     private func setupTimer() {
-        timer?.invalidate() // Invalidate any existing timer
+        timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
             self?.updateStatuses()
         }
@@ -51,12 +49,10 @@ class TaskViewModel: ObservableObject {
             tags: tags,
             reminderDate: reminderDate
         )
-        
         tasks.append(newTask)
         sortTasks()
         
-        // Schedule reminder notification if needed
-        if let reminderDate = reminderDate {
+        if let _ = reminderDate {
             NotificationManager.shared.scheduleTaskReminder(for: newTask)
         }
     }
@@ -69,9 +65,7 @@ class TaskViewModel: ObservableObject {
     
     func deleteTask(_ task: Task) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
-            // Cancel any pending notifications for the task
             NotificationManager.shared.cancelTaskReminder(for: task)
-            // Remove the task from the array
             tasks.remove(at: index)
             objectWillChange.send()
         }
@@ -82,14 +76,11 @@ class TaskViewModel: ObservableObject {
         if dueDate < now {
             return .overdue
         }
-        
         let calendar = Calendar.current
         let components = calendar.dateComponents([.hour], from: now, to: dueDate)
-        
         if let hours = components.hour, hours <= 24 {
             return .closeToDueDate
         }
-        
         return .pending
     }
     
@@ -106,7 +97,6 @@ class TaskViewModel: ObservableObject {
             }
             return updatedTask
         }
-        
         if needsUpdate {
             objectWillChange.send()
             sortTasks()
@@ -119,8 +109,21 @@ class TaskViewModel: ObservableObject {
             updatedTask.status = .completed
             updatedTask.completedDate = Date()
             tasks[index] = updatedTask
-
+            
             NotificationManager.shared.cancelTaskReminder(for: task)
+            
+            objectWillChange.send()
+            sortTasks()
+        }
+    }
+    
+    /// Yeni özellik: Tamamlanan görevin durumunu geri alma.
+    func revertTaskCompletion(_ task: Task) {
+        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+            var updatedTask = task
+            updatedTask.status = determineStatus(dueDate: task.dueDate)
+            updatedTask.completedDate = nil
+            tasks[index] = updatedTask
             
             objectWillChange.send()
             sortTasks()
@@ -130,12 +133,10 @@ class TaskViewModel: ObservableObject {
     func updateTask(_ task: Task) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index] = task
-
-            if let reminderDate = task.reminderDate {
+            if let _ = task.reminderDate {
                 NotificationManager.shared.cancelTaskReminder(for: task)
                 NotificationManager.shared.scheduleTaskReminder(for: task)
             }
-            
             objectWillChange.send()
             sortTasks()
         }
@@ -150,27 +151,25 @@ class TaskViewModel: ObservableObject {
         }
     }
     
-    
     func tasksForStatus(_ status: TaskStatus) -> [Task] {
-        return tasks.filter { $0.status == status }
+        tasks.filter { $0.status == status }
     }
     
     func tasksForType(_ type: TaskType) -> [Task] {
-        return tasks.filter { $0.taskType.id == type.id }
+        tasks.filter { $0.taskType.id == type.id }
     }
     
     func tasksWithTag(_ tag: String) -> [Task] {
-        return tasks.filter { $0.tags.contains(tag) }
+        tasks.filter { $0.tags.contains(tag) }
     }
     
     func overdueTasks() -> [Task] {
-        return tasks.filter { $0.status == .overdue }
+        tasks.filter { $0.status == .overdue }
     }
     
     func upcomingTasks(within days: Int = 7) -> [Task] {
         let calendar = Calendar.current
         let futureDate = calendar.date(byAdding: .day, value: days, to: Date())!
-        
         return tasks.filter { task in
             task.status != .completed &&
             task.dueDate <= futureDate &&

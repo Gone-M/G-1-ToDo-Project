@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct ContentView: View {
     @StateObject private var viewModel = TaskViewModel()
     @State private var showingAddTask = false
@@ -14,7 +15,6 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // Status Filter
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
                         ForEach(TaskStatus.allCases, id: \.self) { status in
@@ -63,6 +63,7 @@ struct ContentView: View {
     }
 }
 
+// MARK: - TaskRow
 
 struct TaskRow: View {
     let task: Task
@@ -115,6 +116,8 @@ struct TaskRow: View {
     }
 }
 
+// MARK: - StatusBadge
+
 struct StatusBadge: View {
     let status: TaskStatus
     
@@ -128,6 +131,8 @@ struct StatusBadge: View {
             .clipShape(Capsule())
     }
 }
+
+// MARK: - PriorityBadge
 
 struct PriorityBadge: View {
     let priority: TaskPriority
@@ -159,6 +164,8 @@ struct PriorityBadge: View {
     }
 }
 
+// MARK: - FilterChip
+
 struct FilterChip: View {
     let title: String
     let isSelected: Bool
@@ -177,6 +184,8 @@ struct FilterChip: View {
         }
     }
 }
+
+// MARK: - AddTaskView
 
 struct AddTaskView: View {
     @ObservedObject var viewModel: TaskViewModel
@@ -252,14 +261,12 @@ struct AddTaskView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
+                    Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Add") {
                         guard let taskType = selectedTaskType else { return }
-                        let tagSet = Set(tags.split(separator: ",").map { String($0.trimmingCharacters(in: .whitespaces)) })
+                        let tagSet = Set(tags.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
                         
                         viewModel.addTask(
                             title: title,
@@ -279,6 +286,8 @@ struct AddTaskView: View {
     }
 }
 
+// MARK: - TaskTypeButton
+
 struct TaskTypeButton: View {
     let type: TaskType
     let isSelected: Bool
@@ -289,15 +298,14 @@ struct TaskTypeButton: View {
             VStack(spacing: 8) {
                 Image(systemName: type.icon)
                     .font(.title2)
-
                 Text(type.name)
                     .font(.caption)
                     .multilineTextAlignment(.center)
-                    .lineLimit(1) // Ensures single-line text
-                    .frame(maxWidth: .infinity) // Centers the text within the button
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity)
             }
             .padding()
-            .frame(width: 100, height: 80) // Ensures all buttons have the same size
+            .frame(width: 100, height: 80)
             .background(isSelected ? type.color : type.color.opacity(0.2))
             .foregroundColor(isSelected ? .white : type.color)
             .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -305,216 +313,13 @@ struct TaskTypeButton: View {
     }
 }
 
-
-
-// FlowLayout definition
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-    
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
-        
-        var height: CGFloat = 0
-        var width: CGFloat = 0
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        
-        for (index, size) in sizes.enumerated() {
-            if x + size.width > (proposal.width ?? .infinity) {
-                y += rowHeight + spacing
-                x = 0
-                rowHeight = 0
-            }
-            
-            x += size.width + spacing
-            width = max(width, x)
-            rowHeight = max(rowHeight, size.height)
-            
-            if index == sizes.count - 1 {
-                height = y + rowHeight
-            }
-        }
-        
-        return CGSize(width: width, height: height)
-    }
-    
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let sizes = subviews.map { $0.sizeThatFits(.unspecified) }
-        
-        var x = bounds.minX
-        var y = bounds.minY
-        var rowHeight: CGFloat = 0
-        
-        for (index, subview) in subviews.enumerated() {
-            let size = sizes[index]
-            
-            if x + size.width > bounds.maxX {
-                y += rowHeight + spacing
-                x = bounds.minX
-                rowHeight = 0
-            }
-            
-            subview.place(
-                at: CGPoint(x: x, y: y),
-                proposal: ProposedViewSize(size)
-            )
-            
-            x += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
-        }
-    }
-}
-
-struct AddTaskTypeView: View {
-    @ObservedObject var viewModel: TaskViewModel
-    @Environment(\.dismiss) var dismiss
-    
-    @State private var name = ""
-    @State private var selectedIcon = "star"
-    @State private var selectedColor = Color.blue
-    
-    let icons = [
-        "star", "heart", "person", "house", "cart", "book", "briefcase",
-        "car", "airplane", "phone", "bolt", "flag", "gift", "tag", "moon",
-        "sun.max", "leaf", "hammer", "wand.and.stars", "gamecontroller"
-    ]
-    
-    // Ready color palette
-    let colorOptions: [Color] = [
-        .blue, .red, .green, .orange, .purple, .pink,
-        .yellow, .mint, .cyan, .indigo, .teal
-    ]
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                // Header with color preview
-                HStack {
-                    Image(systemName: selectedIcon)
-                        .font(.largeTitle)
-                        .foregroundColor(.white)
-                        .frame(width: 60, height: 60)
-                        .background(selectedColor)
-                        .clipShape(Circle())
-                    
-                    VStack(alignment: .leading) {
-                        Text(name.isEmpty ? "New Task Type" : name)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        Text("Preview")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.leading)
-                    
-                    Spacer()
-                }
-                .padding()
-                .background(Color(UIColor.systemBackground))
-                
-                Form {
-                    Section(header: Text("Task Type Details")) {
-                        TextField("Name", text: $name)
-                            .padding(.vertical, 8)
-                    }
-                    
-                    Section(header: Text("Icon Selection")) {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 16) {
-                                ForEach(icons, id: \.self) { icon in
-                                    Button(action: {
-                                        selectedIcon = icon
-                                    }) {
-                                        VStack {
-                                            Image(systemName: icon)
-                                                .font(.title)
-                                                .frame(width: 48, height: 48)
-                                                .foregroundColor(selectedIcon == icon ? .white : .primary)
-                                                .background(
-                                                    selectedIcon == icon ? selectedColor : Color(UIColor.systemGray5)
-                                                )
-                                                .clipShape(Circle())
-                                            
-                                            Text(icon.replacingOccurrences(of: ".", with: " "))
-                                                .font(.caption2)
-                                                .foregroundColor(.secondary)
-                                                .lineLimit(1)
-                                        }
-                                        .frame(width: 60)
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                }
-                            }
-                            .padding(.vertical, 8)
-                        }
-                    }
-                    
-                    Section(header: Text("Color")) {
-                        VStack(alignment: .leading, spacing: 16) {
-                            // Predefined colors
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
-                                ForEach(colorOptions, id: \.self) { color in
-                                    Circle()
-                                        .fill(color)
-                                        .frame(width: 44, height: 44)
-                                        .overlay(
-                                            Circle()
-                                                .stroke(Color.white, lineWidth: 2)
-                                                .padding(2)
-                                                .opacity(selectedColor == color ? 1 : 0)
-                                        )
-                                        .overlay(
-                                            Image(systemName: "checkmark")
-                                                .foregroundColor(.white)
-                                                .opacity(selectedColor == color ? 1 : 0)
-                                        )
-                                        .onTapGesture {
-                                            selectedColor = color
-                                        }
-                                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                                }
-                            }
-                            
-                            // Custom color picker
-                            ColorPicker("Select custom color", selection: $selectedColor)
-                                .padding(.top, 8)
-                        }
-                        .padding(.vertical, 8)
-                    }
-                }
-            }
-            .navigationTitle("New Task Type")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Add") {
-                        let newType = TaskType(
-                            name: name,
-                            icon: selectedIcon,
-                            color: selectedColor
-                        )
-                        viewModel.addTaskType(newType)
-                        dismiss()
-                    }
-                    .font(.headline)
-                    .disabled(name.isEmpty)
-                }
-            }
-        }
-    }
-}
+// MARK: - TaskDetailView
 
 struct TaskDetailView: View {
     let task: Task
     @ObservedObject var viewModel: TaskViewModel
     @Environment(\.dismiss) var dismiss
+    @State private var showingEditTask = false
     
     var body: some View {
         ScrollView {
@@ -534,12 +339,8 @@ struct TaskDetailView: View {
                             Text(task.title)
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            
                             Spacer()
-                            
-                            // We'll use the existing StatusBadge
                         }
-                        
                         Text(task.taskType.name)
                             .font(.subheadline)
                             .foregroundColor(task.taskType.color)
@@ -552,9 +353,8 @@ struct TaskDetailView: View {
                 )
                 .padding(.horizontal)
                 
-                // Common style for cards
+                // Description Card
                 Group {
-                    // Description Card
                     VStack(alignment: .leading, spacing: 12) {
                         Label("Description", systemImage: "text.alignleft")
                             .font(.headline)
@@ -575,8 +375,10 @@ struct TaskDetailView: View {
                             .fill(Color(UIColor.secondarySystemBackground))
                     )
                     .padding(.horizontal)
-                    
-                    // Dates Card
+                }
+                
+                // Dates Card
+                Group {
                     VStack(alignment: .leading, spacing: 16) {
                         Label("Dates", systemImage: "calendar")
                             .font(.headline)
@@ -603,7 +405,7 @@ struct TaskDetailView: View {
                                 title: "Completed",
                                 date: completedDate,
                                 icon: "checkmark.circle.fill",
-                                color: Color.green
+                                color: .green
                             )
                         }
                     }
@@ -613,9 +415,11 @@ struct TaskDetailView: View {
                             .fill(Color(UIColor.secondarySystemBackground))
                     )
                     .padding(.horizontal)
-                    
-                    // Tags
-                    if !task.tags.isEmpty {
+                }
+                
+                // Tags Card
+                if !task.tags.isEmpty {
+                    Group {
                         VStack(alignment: .leading, spacing: 12) {
                             Label("Tags", systemImage: "tag")
                                 .font(.headline)
@@ -626,7 +430,6 @@ struct TaskDetailView: View {
                                     HStack(spacing: 4) {
                                         Image(systemName: "number")
                                             .font(.caption)
-                                        
                                         Text(tag)
                                             .font(.caption)
                                     }
@@ -669,7 +472,8 @@ struct TaskDetailView: View {
                         }
                     } else {
                         Button(action: {
-                            // Function to cancel completion
+                            viewModel.revertTaskCompletion(task)
+                            dismiss()
                         }) {
                             HStack {
                                 Image(systemName: "arrow.uturn.backward.circle.fill")
@@ -686,7 +490,8 @@ struct TaskDetailView: View {
                     }
                     
                     Button(action: {
-                        // Edit function
+                        // Açıklama: Düzenleme görünümünü sunmak için
+                        showingEditTask = true
                     }) {
                         HStack {
                             Image(systemName: "square.and.pencil")
@@ -710,10 +515,14 @@ struct TaskDetailView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .background(Color(UIColor.systemBackground).edgesIgnoringSafeArea(.all))
+        .sheet(isPresented: $showingEditTask) {
+            EditTaskView(task: task, viewModel: viewModel)
+        }
     }
 }
 
-// Instead of redefining DateInfoRow, let's use a different name
+// MARK: - EnhancedDateInfoRow
+
 struct EnhancedDateInfoRow: View {
     let title: String
     let date: Date
@@ -732,9 +541,264 @@ struct EnhancedDateInfoRow: View {
                 Text(title)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                
                 Text(date.formatted(date: .long, time: .shortened))
                     .font(.body)
+            }
+        }
+    }
+}
+
+// MARK: - AddTaskTypeView
+
+struct AddTaskTypeView: View {
+    @ObservedObject var viewModel: TaskViewModel
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var name = ""
+    @State private var selectedIcon = "star"
+    @State private var selectedColor = Color.blue
+    
+    let icons = [
+        "star", "heart", "person", "house", "cart", "book", "briefcase",
+        "car", "airplane", "phone", "bolt", "flag", "gift", "tag", "moon",
+        "sun.max", "leaf", "hammer", "wand.and.stars", "gamecontroller"
+    ]
+    
+    let colorOptions: [Color] = [
+        .blue, .red, .green, .orange, .purple, .pink,
+        .yellow, .mint, .cyan, .indigo, .teal
+    ]
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 0) {
+                // Header with preview
+                HStack {
+                    Image(systemName: selectedIcon)
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                        .frame(width: 60, height: 60)
+                        .background(selectedColor)
+                        .clipShape(Circle())
+                    
+                    VStack(alignment: .leading) {
+                        Text(name.isEmpty ? "New Task Type" : name)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text("Preview")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.leading)
+                    
+                    Spacer()
+                }
+                .padding()
+                .background(Color(UIColor.systemBackground))
+                
+                Form {
+                    Section(header: Text("Task Type Details")) {
+                        TextField("Name", text: $name)
+                            .padding(.vertical, 8)
+                    }
+                    
+                    Section(header: Text("Icon Selection")) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                ForEach(icons, id: \.self) { icon in
+                                    Button(action: {
+                                        selectedIcon = icon
+                                    }) {
+                                        VStack {
+                                            Image(systemName: icon)
+                                                .font(.title)
+                                                .frame(width: 48, height: 48)
+                                                .foregroundColor(selectedIcon == icon ? .white : .primary)
+                                                .background(selectedIcon == icon ? selectedColor : Color(UIColor.systemGray5))
+                                                .clipShape(Circle())
+                                            
+                                            Text(icon.replacingOccurrences(of: ".", with: " "))
+                                                .font(.caption2)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                        }
+                                        .frame(width: 60)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.vertical, 8)
+                        }
+                    }
+                    
+                    Section(header: Text("Color")) {
+                        VStack(alignment: .leading, spacing: 16) {
+                            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 12) {
+                                ForEach(colorOptions, id: \.self) { color in
+                                    Circle()
+                                        .fill(color)
+                                        .frame(width: 44, height: 44)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.white, lineWidth: 2)
+                                                .padding(2)
+                                                .opacity(selectedColor == color ? 1 : 0)
+                                        )
+                                        .overlay(
+                                            Image(systemName: "checkmark")
+                                                .foregroundColor(.white)
+                                                .opacity(selectedColor == color ? 1 : 0)
+                                        )
+                                        .onTapGesture {
+                                            selectedColor = color
+                                        }
+                                        .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
+                                }
+                            }
+                            
+                            ColorPicker("Select custom color", selection: $selectedColor)
+                                .padding(.top, 8)
+                        }
+                        .padding(.vertical, 8)
+                    }
+                }
+            }
+            .navigationTitle("New Task Type")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Add") {
+                        let newType = TaskType(
+                            name: name,
+                            icon: selectedIcon,
+                            color: selectedColor
+                        )
+                        viewModel.addTaskType(newType)
+                        dismiss()
+                    }
+                    .font(.headline)
+                    .disabled(name.isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - EditTaskView
+
+/// Yeni özellik: Mevcut görevin düzenlenmesi için görünüm.
+struct EditTaskView: View {
+    let task: Task
+    @ObservedObject var viewModel: TaskViewModel
+    @Environment(\.dismiss) var dismiss
+    
+    @State private var title: String
+    @State private var description: String
+    @State private var dueDate: Date
+    @State private var selectedTaskType: TaskType
+    @State private var priority: TaskPriority
+    @State private var tags: String
+    @State private var reminderDate: Date?
+    @State private var showingReminderPicker: Bool
+    
+    init(task: Task, viewModel: TaskViewModel) {
+        self.task = task
+        self.viewModel = viewModel
+        // Initialize state with the current task values
+        _title = State(initialValue: task.title)
+        _description = State(initialValue: task.description)
+        _dueDate = State(initialValue: task.dueDate)
+        _selectedTaskType = State(initialValue: task.taskType)
+        _priority = State(initialValue: task.priority)
+        _tags = State(initialValue: task.tags.joined(separator: ", "))
+        _reminderDate = State(initialValue: task.reminderDate)
+        _showingReminderPicker = State(initialValue: task.reminderDate != nil)
+    }
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Task Details")) {
+                    TextField("Title", text: $title)
+                    TextField("Description", text: $description, axis: .vertical)
+                        .lineLimit(3...6)
+                }
+                
+                Section(header: Text("Task Type")) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(viewModel.taskTypes) { type in
+                                TaskTypeButton(
+                                    type: type,
+                                    isSelected: selectedTaskType.id == type.id,
+                                    action: { selectedTaskType = type }
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                Section(header: Text("Date and Time")) {
+                    DatePicker("Due Date", selection: $dueDate)
+                    
+                    Toggle("Set Reminder", isOn: .init(
+                        get: { showingReminderPicker },
+                        set: { newValue in
+                            showingReminderPicker = newValue
+                            if !newValue {
+                                reminderDate = nil
+                            }
+                        }
+                    ))
+                    
+                    if showingReminderPicker {
+                        DatePicker("Reminder", selection: .init(
+                            get: { reminderDate ?? dueDate },
+                            set: { reminderDate = $0 }
+                        ))
+                    }
+                }
+                
+                Section(header: Text("Priority")) {
+                    Picker("Priority", selection: $priority) {
+                        ForEach(TaskPriority.allCases, id: \.self) { priority in
+                            Text(priority.rawValue).tag(priority)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+                
+                Section(header: Text("Tags")) {
+                    TextField("Add tags (comma separated)", text: $tags)
+                }
+            }
+            .navigationTitle("Edit Task")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        // Düzenlenmiş görevi güncelle
+                        let tagSet = Set(tags.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) })
+                        var updatedTask = task
+                        updatedTask.title = title
+                        updatedTask.description = description
+                        updatedTask.dueDate = dueDate
+                        updatedTask.taskType = selectedTaskType
+                        updatedTask.priority = priority
+                        updatedTask.tags = tagSet
+                        updatedTask.reminderDate = reminderDate
+                        
+                        viewModel.updateTask(updatedTask)
+                        dismiss()
+                    }
+                    .disabled(title.isEmpty)
+                }
             }
         }
     }
