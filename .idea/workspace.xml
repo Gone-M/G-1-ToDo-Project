@@ -5,7 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c33442ed-45a4-4270-887c-fcd9eb4a645c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ToDo/Model/FlowLayout.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ToDo/Model/FlowLayout.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ToDo/Model/Task.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ToDo/Model/Task.swift" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +70,8 @@
       <option name="presentableId" value="Default" />
       <updated>1744491497032</updated>
       <workItem from="1744491498906" duration="635000" />
+      <workItem from="1744492145171" duration="536000" />
+      <workItem from="1744495354687" duration="49000" />
     </task>
     <servers />
   </component>

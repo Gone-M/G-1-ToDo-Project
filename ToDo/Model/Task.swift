@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Task Priority
+// MARK: - Priority
 
 enum TaskPriority: String, CaseIterable {
     case low = "Low"
@@ -8,7 +8,7 @@ enum TaskPriority: String, CaseIterable {
     case high = "High"
 }
 
-// MARK: - Task Status
+// MARK: -Status
 
 enum TaskStatus: String, CaseIterable {
     case pending = "Pending"
