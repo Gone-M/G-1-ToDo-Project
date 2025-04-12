@@ -48,7 +48,7 @@ To-Do App is a **task management application** that allows users to create, edit
 Each file contains comments explaining its purpose and implementation details. Major contributions are documented with author names.
 
 ## Demo Video
-A short video demonstrating the app is available at: **https://www.youtube.com/watch?v=mQnD81HFUuM**
+A short video demonstrating the app is available at: **https://www.youtube.com/watch?v=BJTsNpIpbow**
 
 ## License
 This project is for educational purposes and is not intended for commercial use.
