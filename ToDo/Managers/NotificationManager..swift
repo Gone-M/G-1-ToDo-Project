@@ -1,6 +1,6 @@
 import Foundation
 import UserNotifications
-
+// Updated
 class NotificationManager: NSObject {
     static let shared = NotificationManager()
     
